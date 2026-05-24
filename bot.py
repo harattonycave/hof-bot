@@ -15,23 +15,42 @@ pending_posts = {}
 def start(message):
     bot.reply_to(message, "🏆 HOF Başarı Botu aktif.")
 
-@bot.message_handler(content_types=['text'])
-def handle_text(message):
+@bot.message_handler(content_types=['text', 'photo'])
+def handle_post(message):
 
     pending_posts[message.message_id] = message
 
     keyboard = InlineKeyboardMarkup()
 
     keyboard.row(
-        InlineKeyboardButton("✅ Approve", callback_data=f"approve_{message.message_id}"),
-        InlineKeyboardButton("❌ Reject", callback_data=f"reject_{message.message_id}")
+        InlineKeyboardButton(
+            "✅ Approve",
+            callback_data=f"approve_{message.message_id}"
+        ),
+        InlineKeyboardButton(
+            "❌ Reject",
+            callback_data=f"reject_{message.message_id}"
+        )
     )
 
-    bot.send_message(
-        MOD_GROUP_ID,
-        f"🏆 Yeni HOF Gönderisi\n\n{message.text}",
-        reply_markup=keyboard
-    )
+    if message.content_type == "text":
+
+        bot.send_message(
+            MOD_GROUP_ID,
+            f"🏆 Yeni HOF Gönderisi\n\n{message.text}",
+            reply_markup=keyboard
+        )
+
+    elif message.content_type == "photo":
+
+        caption = message.caption if message.caption else "🏆 Yeni HOF Gönderisi"
+
+        bot.send_photo(
+            MOD_GROUP_ID,
+            message.photo[-1].file_id,
+            caption=caption,
+            reply_markup=keyboard
+        )
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
@@ -55,15 +74,16 @@ def callback_query(call):
 
             elif msg.content_type == "photo":
 
-                caption = msg.caption if msg.caption else "🏆 H.O.F 🦁 Başarı Duvarı"
-
-                bot.send_photo(
+                bot.copy_message(
                     CHANNEL_ID,
-                    msg.photo[-1].file_id,
-                    caption=caption
+                    msg.chat.id,
+                    msg.message_id
                 )
 
-            bot.answer_callback_query(call.id, "Onaylandı ✅")
+            bot.answer_callback_query(
+                call.id,
+                "Onaylandı ✅"
+            )
 
             bot.edit_message_reply_markup(
                 call.message.chat.id,
@@ -73,7 +93,10 @@ def callback_query(call):
 
     elif data.startswith("reject_"):
 
-        bot.answer_callback_query(call.id, "Reddedildi ❌")
+        bot.answer_callback_query(
+            call.id,
+            "Reddedildi ❌"
+        )
 
         bot.edit_message_reply_markup(
             call.message.chat.id,
