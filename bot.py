@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTyp
 import os
 
 TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_CHAT_ID = "123456789"
+ADMIN_CHAT_ID = "-1003984397622"
 
 async def forward_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.forward_message(
