@@ -42,42 +42,44 @@ def callback_query(call):
 
         msg_id = int(data.split("_")[1])
 
-if msg_id in pending_posts:
+        if msg_id in pending_posts:
 
-    msg = pending_posts[msg_id]
+            msg = pending_posts[msg_id]
 
-    if msg.content_type == "text":
+            if msg.content_type == "text":
 
-        bot.send_message(
-            CHANNEL_ID,
-            f"🏆 H.O.F 🦁 Başarı Duvarı\n\n{msg.text}"
-        )
+                bot.send_message(
+                    CHANNEL_ID,
+                    f"🏆 H.O.F 🦁 Başarı Duvarı\n\n{msg.text}"
+                )
 
-    elif msg.content_type == "photo":
+            elif msg.content_type == "photo":
 
-        caption = msg.caption if msg.caption else "🏆 H.O.F 🦁 Başarı Duvarı"
+                caption = msg.caption if msg.caption else "🏆 H.O.F 🦁 Başarı Duvarı"
 
-        bot.send_photo(
-            CHANNEL_ID,
-            msg.photo[-1].file_id,
-            caption=caption
-        )
+                bot.send_photo(
+                    CHANNEL_ID,
+                    msg.photo[-1].file_id,
+                    caption=caption
+                )
 
             bot.answer_callback_query(call.id, "Onaylandı ✅")
+
             bot.edit_message_reply_markup(
-    call.message.chat.id,
-    call.message.message_id,
-    reply_markup=None
-)
+                call.message.chat.id,
+                call.message.message_id,
+                reply_markup=None
+            )
 
     elif data.startswith("reject_"):
 
         bot.answer_callback_query(call.id, "Reddedildi ❌")
+
         bot.edit_message_reply_markup(
-    call.message.chat.id,
-    call.message.message_id,
-    reply_markup=None
-)
+            call.message.chat.id,
+            call.message.message_id,
+            reply_markup=None
+        )
 
 print("Bot çalışıyor...")
 
