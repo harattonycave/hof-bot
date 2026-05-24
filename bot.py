@@ -1,21 +1,23 @@
-from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
+import telebot
 import os
 
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_CHAT_ID = "-1003984397622"
 
-async def forward_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.forward_message(
-        chat_id=ADMIN_CHAT_ID,
-        from_chat_id=update.effective_chat.id,
-        message_id=update.message.message_id
+bot = telebot.TeleBot(TOKEN)
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.reply_to(message, "🏆 HOF Başarı Botu aktif.")
+
+@bot.message_handler(func=lambda message: True, content_types=['text', 'photo', 'document'])
+def forward(message):
+    bot.forward_message(
+        ADMIN_CHAT_ID,
+        message.chat.id,
+        message.message_id
     )
-
-app = ApplicationBuilder().token(TOKEN).build()
-
-app.add_handler(MessageHandler(filters.ALL, forward_message))
 
 print("Bot çalışıyor...")
 
-app.run_polling()
+bot.infinity_polling()
