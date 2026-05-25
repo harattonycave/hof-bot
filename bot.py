@@ -190,6 +190,32 @@ def my_stats(message):
     )
 
 
+@bot.message_handler(commands=['leaderboard'])
+def leaderboard(message):
+
+    sorted_users = sorted(
+        users.values(),
+        key=lambda x: x["points"],
+        reverse=True
+    )
+
+    text = "🏆 HOF Leaderboard\n\n"
+
+    medals = ["🥇", "🥈", "🥉"]
+
+    for index, user in enumerate(sorted_users[:10]):
+
+        medal = medals[index] if index < 3 else "🏅"
+
+        text += (
+            f"{medal} HOF {user['rank']} "
+            f"#{user['hof_id']} — "
+            f"{user['points']} puan\n"
+        )
+
+    bot.reply_to(message, text)
+
+
 @bot.message_handler(content_types=['text', 'photo'])
 def handle_post(message):
 
