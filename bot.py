@@ -144,6 +144,52 @@ def remove_elite(message):
         bot.reply_to(message, "Kullanım: /trader 184")
 
 
+@bot.message_handler(commands=['stats'])
+def show_stats(message):
+
+    try:
+
+        hof_number = int(message.text.split()[1])
+
+        for user_id, data in users.items():
+
+            if data["hof_id"] == hof_number:
+
+                bot.reply_to(
+                    message,
+                    f"🏷️ HOF {data['rank']} #{data['hof_id']}\n\n"
+                    f"📈 Toplam Puan: {data['points']}\n"
+                    f"🔥 Approved Paylaşım: {data['approved_posts']}"
+                )
+
+                return
+
+        bot.reply_to(message, "Trader bulunamadı.")
+
+    except:
+        bot.reply_to(message, "Kullanım: /stats 184")
+
+
+@bot.message_handler(commands=['mystats'])
+def my_stats(message):
+
+    user_id = str(message.from_user.id)
+
+    if user_id not in users:
+
+        bot.reply_to(message, "Henüz sistemde kaydınız yok.")
+        return
+
+    data = users[user_id]
+
+    bot.reply_to(
+        message,
+        f"🏷️ HOF {data['rank']} #{data['hof_id']}\n\n"
+        f"📈 Toplam Puanınız: {data['points']}\n"
+        f"🔥 Approved Paylaşımınız: {data['approved_posts']}"
+    )
+
+
 @bot.message_handler(content_types=['text', 'photo'])
 def handle_post(message):
 
