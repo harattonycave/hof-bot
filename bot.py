@@ -37,11 +37,9 @@ def handle_post(message):
 
         bot.send_message(
             MOD_GROUP_ID,
-            f"👤 Gönderen:\n"
-            f"{message.from_user.first_name}\n"
+            f"👤 {message.from_user.first_name}\n"
             f"@{message.from_user.username}\n"
             f"🆔 {message.from_user.id}\n\n"
-            f"🏆 Yeni HOF Gönderisi\n\n"
             f"{message.text}",
             reply_markup=keyboard
         )
@@ -49,11 +47,10 @@ def handle_post(message):
     elif message.content_type == "photo":
 
         caption = (
-            f"👤 Gönderen:\n"
-            f"{message.from_user.first_name}\n"
+            f"👤 {message.from_user.first_name}\n"
             f"@{message.from_user.username}\n"
             f"🆔 {message.from_user.id}\n\n"
-            f"🏆 Yeni HOF Gönderisi"
+            f"{message.caption if message.caption else ''}"
         )
 
         bot.send_photo(
