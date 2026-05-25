@@ -93,6 +93,12 @@ def callback_query(call):
                 "Onaylandı ✅"
             )
 
+            bot.send_message(
+                msg.chat.id,
+                "Gönderiniz H.O.F 🦁 Başarı Duvarı’nda paylaşıldı 🔥\n\n"
+                "Paylaşımlarınıza devam etmeyi ve başarı duvarında beğendiğiniz gönderilere emoji bırakarak topluluk kültürümüzü güçlendirmeyi unutmayın 🦁📈"
+            )
+
             bot.edit_message_reply_markup(
                 call.message.chat.id,
                 call.message.message_id,
