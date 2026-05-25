@@ -13,17 +13,23 @@ bot = telebot.TeleBot(TOKEN)
 
 pending_posts = {}
 
+# USERS
+
 if os.path.exists("users.json"):
     with open("users.json", "r") as f:
         users = json.load(f)
 else:
     users = {}
 
+# POSTS
+
 if os.path.exists("posts.json"):
     with open("posts.json", "r") as f:
         posts = json.load(f)
 else:
     posts = {}
+
+# MODERATION LOGS
 
 if os.path.exists("moderation_logs.json"):
     with open("moderation_logs.json", "r") as f:
@@ -34,8 +40,14 @@ else:
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.reply_to(message, "🏆 HOF Başarı Botu aktif.")
 
+    bot.reply_to(
+        message,
+        "🏆 HOF Başarı Botu aktif."
+    )
+
+
+# ELITE SYSTEM
 
 @bot.message_handler(commands=['elite'])
 def make_elite(message):
@@ -60,7 +72,7 @@ def make_elite(message):
                 data["rank"] = "Elite Trader"
 
                 with open("users.json", "w") as f:
-                    json.dump(users, f)
+                    json.dump(users, f, indent=4)
 
                 bot.reply_to(
                     message,
@@ -72,8 +84,14 @@ def make_elite(message):
         bot.reply_to(message, "Trader bulunamadı.")
 
     except:
-        bot.reply_to(message, "Kullanım: /elite 184")
 
+        bot.reply_to(
+            message,
+            "Kullanım: /elite 184"
+        )
+
+
+# LEGEND SYSTEM
 
 @bot.message_handler(commands=['legend'])
 def make_legend(message):
@@ -98,7 +116,7 @@ def make_legend(message):
                 data["rank"] = "Legend Trader"
 
                 with open("users.json", "w") as f:
-                    json.dump(users, f)
+                    json.dump(users, f, indent=4)
 
                 bot.reply_to(
                     message,
@@ -110,8 +128,14 @@ def make_legend(message):
         bot.reply_to(message, "Trader bulunamadı.")
 
     except:
-        bot.reply_to(message, "Kullanım: /legend 184")
 
+        bot.reply_to(
+            message,
+            "Kullanım: /legend 184"
+        )
+
+
+# RESET TO TRADER
 
 @bot.message_handler(commands=['trader'])
 def remove_elite(message):
@@ -136,7 +160,7 @@ def remove_elite(message):
                 data["rank"] = "Trader"
 
                 with open("users.json", "w") as f:
-                    json.dump(users, f)
+                    json.dump(users, f, indent=4)
 
                 bot.reply_to(
                     message,
@@ -148,8 +172,81 @@ def remove_elite(message):
         bot.reply_to(message, "Trader bulunamadı.")
 
     except:
-        bot.reply_to(message, "Kullanım: /trader 184")
 
+        bot.reply_to(
+            message,
+            "Kullanım: /trader 184"
+        )
+
+
+# REACTION REWARD SYSTEM
+
+@bot.message_handler(commands=['react'])
+def add_reaction_points(message):
+
+    admin_id = message.from_user.id
+
+    allowed_admins = [
+        519641863
+    ]
+
+    if admin_id not in allowed_admins:
+        return
+
+    try:
+
+        args = message.text.split()
+
+        hof_number = int(args[1])
+        reaction_count = int(args[2])
+
+        for user_id, data in users.items():
+
+            if data["hof_id"] == hof_number:
+
+                reward = 0
+
+                if reaction_count >= 10:
+                    reward = 5
+
+                if reaction_count >= 25:
+                    reward = 15
+
+                if reaction_count >= 50:
+                    reward = 30
+
+                data["points"] += reward
+
+                with open("users.json", "w") as f:
+                    json.dump(users, f, indent=4)
+
+                bot.reply_to(
+                    message,
+                    f"🔥 HOF Trader #{hof_number} "
+                    f"{reaction_count} reaction aldı.\n"
+                    f"+{reward} puan eklendi."
+                )
+
+                bot.send_message(
+                    int(user_id),
+                    f"🔥 Gönderiniz toplulukta "
+                    f"{reaction_count} reaction aldı!\n\n"
+                    f"+{reward} bonus puan kazandınız 🦁"
+                )
+
+                return
+
+        bot.reply_to(message, "Trader bulunamadı.")
+
+    except:
+
+        bot.reply_to(
+            message,
+            "Kullanım: /react 184 10"
+        )
+
+
+# PUBLIC STATS
 
 @bot.message_handler(commands=['stats'])
 def show_stats(message):
@@ -182,8 +279,14 @@ def show_stats(message):
         bot.reply_to(message, "Trader bulunamadı.")
 
     except:
-        bot.reply_to(message, "Kullanım: /stats 184")
 
+        bot.reply_to(
+            message,
+            "Kullanım: /stats 184"
+        )
+
+
+# PRIVATE STATS
 
 @bot.message_handler(commands=['mystats'])
 def my_stats(message):
@@ -192,7 +295,11 @@ def my_stats(message):
 
     if user_id not in users:
 
-        bot.reply_to(message, "Henüz sistemde kaydınız yok.")
+        bot.reply_to(
+            message,
+            "Henüz sistemde kaydınız yok."
+        )
+
         return
 
     data = users[user_id]
@@ -212,6 +319,8 @@ def my_stats(message):
         f"🎖️ Achievementleriniz:\n{achievements}"
     )
 
+
+# LEADERBOARD
 
 @bot.message_handler(commands=['leaderboard'])
 def leaderboard(message):
@@ -239,6 +348,8 @@ def leaderboard(message):
     bot.reply_to(message, text)
 
 
+# POST HANDLER
+
 @bot.message_handler(content_types=['text', 'photo'])
 def handle_post(message):
 
@@ -257,7 +368,7 @@ def handle_post(message):
         }
 
         with open("users.json", "w") as f:
-            json.dump(users, f)
+            json.dump(users, f, indent=4)
 
         bot.send_message(
             message.chat.id,
@@ -318,10 +429,14 @@ def handle_post(message):
         )
 
 
+# APPROVE / REJECT
+
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
 
     data = call.data
+
+    # APPROVE
 
     if data.startswith("approve_"):
 
@@ -333,20 +448,24 @@ def callback_query(call):
 
             user_id = str(msg.from_user.id)
 
-            hof_tag = f"HOF {users[user_id]['rank']} #{users[user_id]['hof_id']}"
+            hof_tag = (
+                f"HOF {users[user_id]['rank']} "
+                f"#{users[user_id]['hof_id']}"
+            )
 
             users[user_id]["approved_posts"] += 1
             users[user_id]["points"] += 3
 
-
-            # First Blood Achievement
+            # FIRST BLOOD
 
             if (
                 users[user_id]["approved_posts"] >= 1 and
                 "First Blood" not in users[user_id]["achievements"]
             ):
 
-                users[user_id]["achievements"].append("First Blood")
+                users[user_id]["achievements"].append(
+                    "First Blood"
+                )
 
                 bot.send_message(
                     msg.chat.id,
@@ -354,15 +473,16 @@ def callback_query(call):
                     "İlk approved paylaşımınızı yaptınız 🦁"
                 )
 
-
-            # Consistency Achievement
+            # CONSISTENCY
 
             if (
                 users[user_id]["approved_posts"] >= 10 and
                 "Consistency" not in users[user_id]["achievements"]
             ):
 
-                users[user_id]["achievements"].append("Consistency")
+                users[user_id]["achievements"].append(
+                    "Consistency"
+                )
 
                 bot.send_message(
                     msg.chat.id,
@@ -371,7 +491,9 @@ def callback_query(call):
                 )
 
             with open("users.json", "w") as f:
-                json.dump(users, f)
+                json.dump(users, f, indent=4)
+
+            # SEND CHANNEL POST
 
             if msg.content_type == "text":
 
@@ -394,6 +516,8 @@ def callback_query(call):
                     caption=caption
                 )
 
+            # POSTS DATABASE
+
             posts[str(sent_message.message_id)] = {
                 "owner_id": user_id,
                 "hof_id": users[user_id]["hof_id"],
@@ -403,7 +527,9 @@ def callback_query(call):
             }
 
             with open("posts.json", "w") as f:
-                json.dump(posts, f)
+                json.dump(posts, f, indent=4)
+
+            # MODERATION LOG
 
             admin_id = call.from_user.id
 
@@ -418,7 +544,9 @@ def callback_query(call):
             moderation_logs.append(log_entry)
 
             with open("moderation_logs.json", "w") as f:
-                json.dump(moderation_logs, f)
+                json.dump(moderation_logs, f, indent=4)
+
+            # ADMIN REPORT
 
             bot.send_message(
                 519641863,
@@ -427,7 +555,8 @@ def callback_query(call):
                 f"👮 Admin ID: {admin_id}\n"
                 f"🏷️ HOF {users[user_id]['rank']} "
                 f"#{users[user_id]['hof_id']}\n"
-                f"🕒 {datetime.now().strftime('%d.%m.%Y %H:%M')}"
+                f"🕒 "
+                f"{datetime.now().strftime('%d.%m.%Y %H:%M')}"
             )
 
             bot.answer_callback_query(
@@ -435,12 +564,22 @@ def callback_query(call):
                 "Onaylandı ✅"
             )
 
+            # USER REPORT
+
             bot.send_message(
                 msg.chat.id,
-                f"Gönderiniz H.O.F 🦁 Başarı Duvarı’nda paylaşıldı 🔥\n\n"
-                f"Toplam approved paylaşımınız: {users[user_id]['approved_posts']}\n"
-                f"Toplam puanınız: {users[user_id]['points']} 📈\n\n"
-                f"Paylaşımlarınıza devam etmeyi ve başarı duvarında beğendiğiniz gönderilere emoji bırakarak topluluk kültürümüzü güçlendirmeyi unutmayın 🦁"
+                f"Gönderiniz H.O.F 🦁 "
+                f"Başarı Duvarı’nda paylaşıldı 🔥\n\n"
+                f"Toplam approved paylaşımınız: "
+                f"{users[user_id]['approved_posts']}\n"
+                f"Toplam puanınız: "
+                f"{users[user_id]['points']} 📈\n\n"
+                f"Paylaşımlarınıza devam etmeyi "
+                f"ve başarı duvarında "
+                f"beğendiğiniz gönderilere "
+                f"emoji bırakarak topluluk "
+                f"kültürümüzü güçlendirmeyi "
+                f"unutmayın 🦁"
             )
 
             bot.edit_message_reply_markup(
@@ -448,6 +587,8 @@ def callback_query(call):
                 call.message.message_id,
                 reply_markup=None
             )
+
+    # REJECT
 
     elif data.startswith("reject_"):
 
@@ -462,14 +603,15 @@ def callback_query(call):
         moderation_logs.append(log_entry)
 
         with open("moderation_logs.json", "w") as f:
-            json.dump(moderation_logs, f)
+            json.dump(moderation_logs, f, indent=4)
 
         bot.send_message(
             519641863,
             f"📋 Eylem Raporu\n\n"
             f"❌ Reject\n"
             f"👮 Admin ID: {admin_id}\n"
-            f"🕒 {datetime.now().strftime('%d.%m.%Y %H:%M')}"
+            f"🕒 "
+            f"{datetime.now().strftime('%d.%m.%Y %H:%M')}"
         )
 
         bot.answer_callback_query(
@@ -482,6 +624,7 @@ def callback_query(call):
             call.message.message_id,
             reply_markup=None
         )
+
 
 print("Bot çalışıyor...")
 
