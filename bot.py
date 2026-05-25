@@ -77,15 +77,23 @@ def callback_query(call):
 
                 bot.send_message(
                     CHANNEL_ID,
-                    f"🏆 H.O.F 🦁 Başarı Duvarı\n\n{msg.text}"
+                    f"🏆 H.O.F 🦁 Başarı Duvarı\n\n"
+                    f"{msg.from_user.first_name}\n\n"
+                    f"{msg.text}"
                 )
 
             elif msg.content_type == "photo":
 
-                bot.copy_message(
+                caption = (
+                    f"🏆 H.O.F 🦁 Başarı Duvarı\n\n"
+                    f"{msg.from_user.first_name}\n\n"
+                    f"{msg.caption if msg.caption else ''}"
+                )
+
+                bot.send_photo(
                     CHANNEL_ID,
-                    msg.chat.id,
-                    msg.message_id
+                    msg.photo[-1].file_id,
+                    caption=caption
                 )
 
             bot.answer_callback_query(
