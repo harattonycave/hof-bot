@@ -533,11 +533,25 @@ def callback_query(call):
 
             admin_id = call.from_user.id
 
+            preview_text = ""
+
+            if msg.content_type == "text":
+
+                preview_text = msg.text[:200]
+
+            elif msg.content_type == "photo":
+
+                preview_text = (
+                    msg.caption[:200]
+                    if msg.caption else "Fotoğraf paylaşımı"
+                )
+
             log_entry = {
                 "action": "approve",
                 "admin_id": admin_id,
                 "hof_id": users[user_id]["hof_id"],
                 "rank": users[user_id]["rank"],
+                "post_preview": preview_text,
                 "time": str(datetime.now())
             }
 
@@ -554,7 +568,9 @@ def callback_query(call):
                 f"✅ Approve\n"
                 f"👮 Admin ID: {admin_id}\n"
                 f"🏷️ HOF {users[user_id]['rank']} "
-                f"#{users[user_id]['hof_id']}\n"
+                f"#{users[user_id]['hof_id']}\n\n"
+                f"📝 Gönderi:\n"
+                f"{preview_text}\n\n"
                 f"🕒 "
                 f"{datetime.now().strftime('%d.%m.%Y %H:%M')}"
             )
@@ -592,11 +608,32 @@ def callback_query(call):
 
     elif data.startswith("reject_"):
 
+        msg_id = int(data.split("_")[1])
+
         admin_id = call.from_user.id
+
+        preview_text = ""
+
+        if msg_id in pending_posts:
+
+            rejected_msg = pending_posts[msg_id]
+
+            if rejected_msg.content_type == "text":
+
+                preview_text = rejected_msg.text[:200]
+
+            elif rejected_msg.content_type == "photo":
+
+                preview_text = (
+                    rejected_msg.caption[:200]
+                    if rejected_msg.caption
+                    else "Fotoğraf paylaşımı"
+                )
 
         log_entry = {
             "action": "reject",
             "admin_id": admin_id,
+            "post_preview": preview_text,
             "time": str(datetime.now())
         }
 
@@ -609,7 +646,9 @@ def callback_query(call):
             519641863,
             f"📋 Eylem Raporu\n\n"
             f"❌ Reject\n"
-            f"👮 Admin ID: {admin_id}\n"
+            f"👮 Admin ID: {admin_id}\n\n"
+            f"📝 Gönderi:\n"
+            f"{preview_text}\n\n"
             f"🕒 "
             f"{datetime.now().strftime('%d.%m.%Y %H:%M')}"
         )
