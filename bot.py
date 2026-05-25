@@ -209,6 +209,13 @@ def handle_post(message):
         with open("users.json", "w") as f:
             json.dump(users, f)
 
+        bot.send_message(
+            message.chat.id,
+            f"🏷️ HOF Trader #{hof_number} olarak sisteme katıldınız 🦁\n\n"
+            f"Başarı paylaşımlarınız artık H.O.F ekosisteminde yer alabilir.\n"
+            f"Disiplinli kalın, gelişmeye devam edin ve kültürü birlikte büyütelim 📈"
+        )
+
     pending_posts[message.message_id] = message
 
     keyboard = InlineKeyboardMarkup()
