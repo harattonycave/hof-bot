@@ -155,11 +155,19 @@ def show_stats(message):
 
             if data["hof_id"] == hof_number:
 
+                achievements = "\n".join(
+                    [f"🏅 {a}" for a in data.get("achievements", [])]
+                )
+
+                if achievements == "":
+                    achievements = "Henüz achievement yok."
+
                 bot.reply_to(
                     message,
                     f"🏷️ HOF {data['rank']} #{data['hof_id']}\n\n"
                     f"📈 Toplam Puan: {data['points']}\n"
-                    f"🔥 Approved Paylaşım: {data['approved_posts']}"
+                    f"🔥 Approved Paylaşım: {data['approved_posts']}\n\n"
+                    f"🎖️ Achievementler:\n{achievements}"
                 )
 
                 return
@@ -182,11 +190,19 @@ def my_stats(message):
 
     data = users[user_id]
 
+    achievements = "\n".join(
+        [f"🏅 {a}" for a in data.get("achievements", [])]
+    )
+
+    if achievements == "":
+        achievements = "Henüz achievement yok."
+
     bot.reply_to(
         message,
         f"🏷️ HOF {data['rank']} #{data['hof_id']}\n\n"
         f"📈 Toplam Puanınız: {data['points']}\n"
-        f"🔥 Approved Paylaşımınız: {data['approved_posts']}"
+        f"🔥 Approved Paylaşımınız: {data['approved_posts']}\n\n"
+        f"🎖️ Achievementleriniz:\n{achievements}"
     )
 
 
@@ -229,7 +245,8 @@ def handle_post(message):
             "hof_id": hof_number,
             "rank": "Trader",
             "points": 0,
-            "approved_posts": 0
+            "approved_posts": 0,
+            "achievements": []
         }
 
         with open("users.json", "w") as f:
@@ -313,6 +330,38 @@ def callback_query(call):
 
             users[user_id]["approved_posts"] += 1
             users[user_id]["points"] += 3
+
+
+            # First Blood Achievement
+
+            if (
+                users[user_id]["approved_posts"] >= 1 and
+                "First Blood" not in users[user_id]["achievements"]
+            ):
+
+                users[user_id]["achievements"].append("First Blood")
+
+                bot.send_message(
+                    msg.chat.id,
+                    "🎖️ Achievement Unlocked: First Blood\n\n"
+                    "İlk approved paylaşımınızı yaptınız 🦁"
+                )
+
+
+            # Consistency Achievement
+
+            if (
+                users[user_id]["approved_posts"] >= 10 and
+                "Consistency" not in users[user_id]["achievements"]
+            ):
+
+                users[user_id]["achievements"].append("Consistency")
+
+                bot.send_message(
+                    msg.chat.id,
+                    "🎖️ Achievement Unlocked: Consistency\n\n"
+                    "10 approved paylaşım seviyesine ulaştınız 🔥"
+                )
 
             with open("users.json", "w") as f:
                 json.dump(users, f)
