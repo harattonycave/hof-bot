@@ -22,6 +22,83 @@ else:
 def start(message):
     bot.reply_to(message, "🏆 HOF Başarı Botu aktif.")
 
+
+@bot.message_handler(commands=['elite'])
+def make_elite(message):
+
+    admin_id = message.from_user.id
+
+    allowed_admins = [
+        519641863
+    ]
+
+    if admin_id not in allowed_admins:
+        return
+
+    try:
+
+        hof_number = int(message.text.split()[1])
+
+        for user_id, data in users.items():
+
+            if data["hof_id"] == hof_number:
+
+                data["rank"] = "Elite Trader"
+
+                with open("users.json", "w") as f:
+                    json.dump(users, f)
+
+                bot.reply_to(
+                    message,
+                    f"HOF Trader #{hof_number} artık Elite Trader oldu 🦁"
+                )
+
+                return
+
+        bot.reply_to(message, "Trader bulunamadı.")
+
+    except:
+        bot.reply_to(message, "Kullanım: /elite 184")
+
+
+@bot.message_handler(commands=['trader'])
+def remove_elite(message):
+
+    admin_id = message.from_user.id
+
+    allowed_admins = [
+        519641863
+    ]
+
+    if admin_id not in allowed_admins:
+        return
+
+    try:
+
+        hof_number = int(message.text.split()[1])
+
+        for user_id, data in users.items():
+
+            if data["hof_id"] == hof_number:
+
+                data["rank"] = "Trader"
+
+                with open("users.json", "w") as f:
+                    json.dump(users, f)
+
+                bot.reply_to(
+                    message,
+                    f"HOF Trader #{hof_number} normal Trader seviyesine döndürüldü."
+                )
+
+                return
+
+        bot.reply_to(message, "Trader bulunamadı.")
+
+    except:
+        bot.reply_to(message, "Kullanım: /trader 184")
+
+
 @bot.message_handler(content_types=['text', 'photo'])
 def handle_post(message):
 
@@ -56,7 +133,7 @@ def handle_post(message):
         )
     )
 
-    hof_tag = f"HOF Trader #{users[user_id]['hof_id']}"
+    hof_tag = f"HOF {users[user_id]['rank']} #{users[user_id]['hof_id']}"
 
     if message.content_type == "text":
 
@@ -86,6 +163,7 @@ def handle_post(message):
             caption=caption,
             reply_markup=keyboard
         )
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
