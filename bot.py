@@ -1,6 +1,7 @@
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 import os
+import json
 
 TOKEN = os.getenv("BOT_TOKEN")
 
@@ -11,12 +12,34 @@ bot = telebot.TeleBot(TOKEN)
 
 pending_posts = {}
 
+if os.path.exists("users.json"):
+    with open("users.json", "r") as f:
+        users = json.load(f)
+else:
+    users = {}
+
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.reply_to(message, "🏆 HOF Başarı Botu aktif.")
 
 @bot.message_handler(content_types=['text', 'photo'])
 def handle_post(message):
+
+    user_id = str(message.from_user.id)
+
+    if user_id not in users:
+
+        hof_number = len(users) + 101
+
+        users[user_id] = {
+            "hof_id": hof_number,
+            "rank": "Trader",
+            "points": 0,
+            "approved_posts": 0
+        }
+
+        with open("users.json", "w") as f:
+            json.dump(users, f)
 
     pending_posts[message.message_id] = message
 
@@ -33,13 +56,16 @@ def handle_post(message):
         )
     )
 
+    hof_tag = f"HOF Trader #{users[user_id]['hof_id']}"
+
     if message.content_type == "text":
 
         bot.send_message(
             MOD_GROUP_ID,
             f"👤 {message.from_user.first_name}\n"
             f"@{message.from_user.username}\n"
-            f"🆔 {message.from_user.id}\n\n"
+            f"🆔 {message.from_user.id}\n"
+            f"🏷️ {hof_tag}\n\n"
             f"{message.text}",
             reply_markup=keyboard
         )
@@ -49,7 +75,8 @@ def handle_post(message):
         caption = (
             f"👤 {message.from_user.first_name}\n"
             f"@{message.from_user.username}\n"
-            f"🆔 {message.from_user.id}\n\n"
+            f"🆔 {message.from_user.id}\n"
+            f"🏷️ {hof_tag}\n\n"
             f"{message.caption if message.caption else ''}"
         )
 
@@ -73,19 +100,29 @@ def callback_query(call):
 
             msg = pending_posts[msg_id]
 
+            user_id = str(msg.from_user.id)
+
+            hof_tag = f"HOF {users[user_id]['rank']} #{users[user_id]['hof_id']}"
+
+            users[user_id]["approved_posts"] += 1
+            users[user_id]["points"] += 3
+
+            with open("users.json", "w") as f:
+                json.dump(users, f)
+
             if msg.content_type == "text":
 
                 bot.send_message(
                     CHANNEL_ID,
                     f"{msg.text}\n\n"
-                    f"(Gönderen: {msg.from_user.first_name})"
+                    f"(Gönderen: {hof_tag})"
                 )
 
             elif msg.content_type == "photo":
 
                 caption = (
                     f"{msg.caption if msg.caption else ''}\n\n"
-                    f"(Gönderen: {msg.from_user.first_name})"
+                    f"(Gönderen: {hof_tag})"
                 )
 
                 bot.send_photo(
@@ -101,8 +138,10 @@ def callback_query(call):
 
             bot.send_message(
                 msg.chat.id,
-                "Gönderiniz H.O.F 🦁 Başarı Duvarı’nda paylaşıldı 🔥\n\n"
-                "Paylaşımlarınıza devam etmeyi ve başarı duvarında beğendiğiniz gönderilere emoji bırakarak topluluk kültürümüzü güçlendirmeyi unutmayın 🦁📈"
+                f"Gönderiniz H.O.F 🦁 Başarı Duvarı’nda paylaşıldı 🔥\n\n"
+                f"Toplam approved paylaşımınız: {users[user_id]['approved_posts']}\n"
+                f"Toplam puanınız: {users[user_id]['points']} 📈\n\n"
+                f"Paylaşımlarınıza devam etmeyi ve başarı duvarında beğendiğiniz gönderilere emoji bırakarak topluluk kültürümüzü güçlendirmeyi unutmayın 🦁"
             )
 
             bot.edit_message_reply_markup(
