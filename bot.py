@@ -433,3 +433,5 @@ def callback_query(call):
 print("Bot çalışıyor...")
 
 bot.infinity_polling()
+
+tamam bu iki bahsettigin seyi de koda ekleyerek bana tam kodu ver
