@@ -24,6 +24,7 @@ if os.path.exists("posts.json"):
 else:
     posts = {}
 
+
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.reply_to(message, "🏆 HOF Başarı Botu aktif.")
@@ -65,6 +66,44 @@ def make_elite(message):
 
     except:
         bot.reply_to(message, "Kullanım: /elite 184")
+
+
+@bot.message_handler(commands=['legend'])
+def make_legend(message):
+
+    admin_id = message.from_user.id
+
+    allowed_admins = [
+        519641863
+    ]
+
+    if admin_id not in allowed_admins:
+        return
+
+    try:
+
+        hof_number = int(message.text.split()[1])
+
+        for user_id, data in users.items():
+
+            if data["hof_id"] == hof_number:
+
+                data["rank"] = "Legend Trader"
+
+                with open("users.json", "w") as f:
+                    json.dump(users, f)
+
+                bot.reply_to(
+                    message,
+                    f"HOF Trader #{hof_number} artık Legend Trader oldu 👑"
+                )
+
+                return
+
+        bot.reply_to(message, "Trader bulunamadı.")
+
+    except:
+        bot.reply_to(message, "Kullanım: /legend 184")
 
 
 @bot.message_handler(commands=['trader'])
