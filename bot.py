@@ -2,6 +2,7 @@ import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 import os
 import json
+from datetime import datetime
 
 TOKEN = os.getenv("BOT_TOKEN")
 
@@ -23,6 +24,12 @@ if os.path.exists("posts.json"):
         posts = json.load(f)
 else:
     posts = {}
+
+if os.path.exists("moderation_logs.json"):
+    with open("moderation_logs.json", "r") as f:
+        moderation_logs = json.load(f)
+else:
+    moderation_logs = []
 
 
 @bot.message_handler(commands=['start'])
@@ -398,6 +405,31 @@ def callback_query(call):
             with open("posts.json", "w") as f:
                 json.dump(posts, f)
 
+            admin_id = call.from_user.id
+
+            log_entry = {
+                "action": "approve",
+                "admin_id": admin_id,
+                "hof_id": users[user_id]["hof_id"],
+                "rank": users[user_id]["rank"],
+                "time": str(datetime.now())
+            }
+
+            moderation_logs.append(log_entry)
+
+            with open("moderation_logs.json", "w") as f:
+                json.dump(moderation_logs, f)
+
+            bot.send_message(
+                519641863,
+                f"📋 Eylem Raporu\n\n"
+                f"✅ Approve\n"
+                f"👮 Admin ID: {admin_id}\n"
+                f"🏷️ HOF {users[user_id]['rank']} "
+                f"#{users[user_id]['hof_id']}\n"
+                f"🕒 {datetime.now().strftime('%d.%m.%Y %H:%M')}"
+            )
+
             bot.answer_callback_query(
                 call.id,
                 "Onaylandı ✅"
@@ -419,6 +451,27 @@ def callback_query(call):
 
     elif data.startswith("reject_"):
 
+        admin_id = call.from_user.id
+
+        log_entry = {
+            "action": "reject",
+            "admin_id": admin_id,
+            "time": str(datetime.now())
+        }
+
+        moderation_logs.append(log_entry)
+
+        with open("moderation_logs.json", "w") as f:
+            json.dump(moderation_logs, f)
+
+        bot.send_message(
+            519641863,
+            f"📋 Eylem Raporu\n\n"
+            f"❌ Reject\n"
+            f"👮 Admin ID: {admin_id}\n"
+            f"🕒 {datetime.now().strftime('%d.%m.%Y %H:%M')}"
+        )
+
         bot.answer_callback_query(
             call.id,
             "Reddedildi ❌"
@@ -433,5 +486,3 @@ def callback_query(call):
 print("Bot çalışıyor...")
 
 bot.infinity_polling()
-
-tamam bu iki bahsettigin seyi de koda ekleyerek bana tam kodu ver
