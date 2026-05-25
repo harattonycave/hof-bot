@@ -140,7 +140,7 @@ def handle_post(message):
         bot.send_message(
             MOD_GROUP_ID,
             f"👤 {message.from_user.first_name}\n"
-            f"@{message.from_user.username}\n"
+            f"@{message.from_user.username}\n" if message.from_user.username else ""
             f"🆔 {message.from_user.id}\n"
             f"🏷️ {hof_tag}\n\n"
             f"{message.text}",
@@ -151,7 +151,7 @@ def handle_post(message):
 
         caption = (
             f"👤 {message.from_user.first_name}\n"
-            f"@{message.from_user.username}\n"
+            f"@{message.from_user.username}\n" if message.from_user.username else ""
             f"🆔 {message.from_user.id}\n"
             f"🏷️ {hof_tag}\n\n"
             f"{message.caption if message.caption else ''}"
