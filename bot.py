@@ -18,6 +18,12 @@ if os.path.exists("users.json"):
 else:
     users = {}
 
+if os.path.exists("posts.json"):
+    with open("posts.json", "r") as f:
+        posts = json.load(f)
+else:
+    posts = {}
+
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.reply_to(message, "🏆 HOF Başarı Botu aktif.")
@@ -135,12 +141,17 @@ def handle_post(message):
 
     hof_tag = f"HOF {users[user_id]['rank']} #{users[user_id]['hof_id']}"
 
+    username_line = (
+        f"@{message.from_user.username}\n"
+        if message.from_user.username else ""
+    )
+
     if message.content_type == "text":
 
         bot.send_message(
             MOD_GROUP_ID,
             f"👤 {message.from_user.first_name}\n"
-            f"@{message.from_user.username}\n" if message.from_user.username else ""
+            f"{username_line}"
             f"🆔 {message.from_user.id}\n"
             f"🏷️ {hof_tag}\n\n"
             f"{message.text}",
@@ -151,7 +162,7 @@ def handle_post(message):
 
         caption = (
             f"👤 {message.from_user.first_name}\n"
-            f"@{message.from_user.username}\n" if message.from_user.username else ""
+            f"{username_line}"
             f"🆔 {message.from_user.id}\n"
             f"🏷️ {hof_tag}\n\n"
             f"{message.caption if message.caption else ''}"
@@ -190,7 +201,7 @@ def callback_query(call):
 
             if msg.content_type == "text":
 
-                bot.send_message(
+                sent_message = bot.send_message(
                     CHANNEL_ID,
                     f"{msg.text}\n\n"
                     f"(Gönderen: {hof_tag})"
@@ -203,11 +214,22 @@ def callback_query(call):
                     f"(Gönderen: {hof_tag})"
                 )
 
-                bot.send_photo(
+                sent_message = bot.send_photo(
                     CHANNEL_ID,
                     msg.photo[-1].file_id,
                     caption=caption
                 )
+
+            posts[str(sent_message.message_id)] = {
+                "owner_id": user_id,
+                "hof_id": users[user_id]["hof_id"],
+                "rank": users[user_id]["rank"],
+                "reactions": 0,
+                "rewarded_10": False
+            }
+
+            with open("posts.json", "w") as f:
+                json.dump(posts, f)
 
             bot.answer_callback_query(
                 call.id,
